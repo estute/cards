@@ -4,7 +4,7 @@ import copy
 
 import pytest
 
-from cards.cards import (
+from card_lib.cards import (
     Color,
     Suit,
     Card,
