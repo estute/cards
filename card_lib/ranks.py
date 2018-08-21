@@ -31,7 +31,7 @@ class CardRanksInterface(ABC):
         """
         pass
 
-    def beats(self, card1, card2):
+    def winner(self, card1, card2):
         """
         Determine if card1 or card2 is ranked higher. If same rank, return None.
 

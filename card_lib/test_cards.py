@@ -26,17 +26,17 @@ class TestCardRules(object):
     def test_beat_same_card(self, ace_high_card_rules):
         card_1 = Card('7', Suit.HEART)
         card_2 = Card('7', Suit.CLUB)
-        assert ace_high_card_rules.beats(card_1, card_2) is None
+        assert ace_high_card_rules.winner(card_1, card_2) is None
 
     def test_beat_ace_high(self, ace_high_card_rules):
         card_1 = Card('7', Suit.HEART)
         card_2 = Card('A', Suit.CLUB)
-        assert ace_high_card_rules.beats(card_1, card_2) == card_2
+        assert ace_high_card_rules.winner(card_1, card_2) == card_2
 
     def test_beat_ace_low(self, ace_low_card_rules):
         card_1 = Card('7', Suit.HEART)
         card_2 = Card('A', Suit.CLUB)
-        assert ace_low_card_rules.beats(card_1, card_2) == card_1
+        assert ace_low_card_rules.winner(card_1, card_2) == card_1
 
 
 class TestDeck(object):
