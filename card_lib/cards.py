@@ -1,10 +1,9 @@
-""" library for card games """
+"""
+Classes for defining cards, card characteristics, and card decks.
+"""
 
 from enum import Enum
 import random
-
-# TODO: pick a better way to pass rules around throughout the game
-ACES_HIGH = True
 
 # The possible 'pips' or values of a given card. These include
 # numbers, aces and face cards
@@ -14,12 +13,13 @@ PIPS = [
 ]
 
 class Color(Enum):
-    __order__ = 'red black'
+    __order__ = 'RED BLACK'
     RED = 'red'
     BLACK = 'black'
 
+
 class Suit(Enum):
-    __order__ = 'hearts diamonds clubs spades'
+    __order__ = 'HEART DIAMOND CLUB SPADE'
     HEART = ('hearts', u'\u2665', Color.RED)
     DIAMOND = ('diamonds', u'\u2666', Color.RED)
     CLUB = ('clubs', u'\u2663', Color.BLACK)
@@ -45,46 +45,6 @@ class Card(object):
 
     def __eq__(self, other):
         return self.pip == other.pip and self.suit == other.suit
-
-    @property
-    def pip_score(self):
-        """
-        the score of the pip, used when calculating points at
-        the end of a game. Depending on the rules of a game, aces
-        can be considered high or low.
-        """
-        if self.pip in ['J', 'Q', 'K']:
-            return 11
-        elif self.pip == 'A':
-            if ACES_HIGH:
-                return 11
-            else:
-                return 1
-        else:
-            return int(self.pip)
-
-    @property
-    def pip_ordinal(self):
-        """
-        the ordinal number for a given pip, which can be used
-        in comparing with other pips, i.e. 10=10, J=11, etc...
-        """
-        _face_ordinals = {'J': 11, 'Q': 12, 'K': 13}
-        if self.pip in ['J', 'Q', 'K']:
-            return _face_ordinals[self.pip]
-        if self.pip == 'A':
-            if ACES_HIGH:
-                return 14
-            else:
-                return 1
-        else:
-            return int(self.pip)
-
-    def beats(self, card):
-        """
-        determine if this card is ranked higher than another
-        """
-        return self.pip_ordinal > card.pip_ordinal
 
 
 class Deck(object):
@@ -153,7 +113,7 @@ class Deck(object):
 
     def shuffle(self):
         """
-        shuffle the order of the cards in the deck. 
+        shuffle the order of the cards in the deck.
         """
         for step in range(self.size):
             card = self.cards.pop()
