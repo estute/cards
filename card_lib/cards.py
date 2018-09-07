@@ -3,14 +3,16 @@ Classes for defining cards, card characteristics, and card decks.
 """
 
 from enum import Enum
+import json
 import random
 
 # The possible 'pips' or values of a given card. These include
 # numbers, aces and face cards
 PIPS = [
-    '2', '3', '4', '5' , '6' , '7', '8', '9', '10',
+    '2', '3', '4', '5', '6', '7', '8', '9', '10',
     'J', 'Q', 'K', 'A'
 ]
+
 
 class Color(Enum):
     __order__ = 'RED BLACK'
@@ -34,17 +36,50 @@ class Suit(Enum):
         return self.symbol
 
 
+ALL_SUITS = (Suit.HEART, Suit.DIAMOND, Suit.CLUB, Suit.SPADE)
+ALL_SUIT_SYMBOLS = [s.symbol for s in ALL_SUITS]
+
+
+def _symbol_to_suit(symbol):
+    """
+    Given a card symbol, find the matching card suit.
+    """
+    for one_suit in ALL_SUITS:
+        if one_suit.symbol == symbol:
+            return one_suit
+    raise UnknownSuitError('No suit found for symbol "{}"'.format(symbol))
+
+
 class Card(object):
 
     def __init__(self, pip, suit):
         self.pip = pip
-        self.suit = suit
+        if suit in ALL_SUIT_SYMBOLS:
+            self.suit = _symbol_to_suit(suit)
+        else:
+            self.suit = suit
+
+    def to_json(self):
+        """
+        Return a string containing a JSON representation of a card.
+        """
+        return '{{"suit":"{}", "pip":"{}"}}'.format(self.suit, self.pip)
+
+    @classmethod
+    def from_json(cls, json_str):
+        """
+        Loads a card from a valid JSON representation.
+        """
+        card = json.loads(json_str)
+        return cls(card['pip'], _symbol_to_suit(card['suit']))
 
     def __str__(self):
         return '{} {}'.format(self.pip, self.suit)
 
     def __eq__(self, other):
-        return self.pip == other.pip and self.suit == other.suit
+        if isinstance(other, self.__class__):
+            return self.pip == other.pip and self.suit == other.suit
+        return False
 
 
 class Deck(object):
@@ -92,7 +127,7 @@ class Deck(object):
         to inserting them at the bottom of the deck
         """
         if card in self.cards:
-            raise ImpossibleCardException(
+            raise ImpossibleCardError(
                 "Duplicate card found in deck"
             )
         first_chunk, second_chunk = self._split(position)
@@ -120,10 +155,27 @@ class Deck(object):
             new_pos = random.randint(0, self.size - 1)
             self.insert(card, new_pos)
 
+    def to_json(self):
+        """
+        Return a string containing a JSON representation of a card list.
+        """
+        return '[{}]'.format(','.join([card.to_json() for card in self.cards]))
+
+    @classmethod
+    def from_json(cls, json_str):
+        """
+        Creates a card list from a valid JSON representation.
+        """
+        card_list = json.loads(json_str)
+        deck = cls(full_deck=False)
+        for card in card_list:
+            deck.cards.append(Card(card['pip'], _symbol_to_suit(card['suit'])))
+        return deck
+
     def _degree_of_diff(self, other_deck):
         """
-        helper function for calculating how shuffled a deck of cards is compared
-        to another.
+        Helper function for calculating how shuffled a deck of cards is
+        compared to another.
         * The `other deck` represents the this deck, but prior to the shuffle
         * The degree of shuffling is decided by comparing how many cards have
         moved from their initial position
@@ -133,5 +185,9 @@ class Deck(object):
         )).count(False)
 
 
-class ImpossibleCardException(Exception):
+class ImpossibleCardError(Exception):
+    pass
+
+
+class UnknownSuitError(Exception):
     pass
